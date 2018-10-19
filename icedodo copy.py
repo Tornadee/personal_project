@@ -146,10 +146,10 @@ class game:
 		else:
 			# reset environment
 			# randomize map or keep the same map?
-			self.platforms = [];
+			'''self.platforms = [];
 			self.previous_platform_x = 0;
 			self.previous_platform_z = -5;
-			self._build_platform();
+			self._build_platform();'''
 			self.player.x, self.player.z, self.player.r = 0.0, 0.0, 0.0;
 			self.state = self._return_state();
 			self.step = 0;
