@@ -43,19 +43,19 @@ class AI:
 	def _replay(self):
 		sample = self._sample(self.data, self.batch_size);
 		for state, action, next_state, reward, done in sample:
-			# new Q-table = 
-			# Current Q-table +
-			q_current = self.model.predict(np.array([state]));
-			# discount rate (gamma) * max_possible Q
-			q_future = self.model.predict(np.array([next_state]))[0];
-			max_q = q_future[np.argmax(q_future)];
-			# new Q_s_a =
-			q_new = q_current + self.alpha * (reward + (self.gamma * max_q) - q_current)
-			# assignment
-			q_current[action] = q_new
-			xs = np.array()
-			ys = np.array()
-			self.model.fit(xs, ys, epochs=1);
+			target = reward
+			if not done:
+				# Q s-a
+				next_state_prediction = self.model.predict(np.array([next_state]))[0];
+				target = reward + self.gamma * np.max(next_state_prediction)
+
+			new_q = self.model.predict(np.array([state]));
+			new_q[action] = target
+			xs = np.array([state])
+			ys = np.array([new_q])
+			print(xs)
+			print(ys)
+			self.model.fit(xs, ys, epochs=1, verbose=0)
 
 	def _predict(self, state):
 	    pred = self.model.predict(np.array(state));
@@ -111,7 +111,7 @@ class game:
 			self.platforms.pop(0);
 
 		# this part will be controlled by the AI.
-		action = AI._choose_action(self.state);
+		action = 0; #AI._choose_action(self.state);
 		self.player.r += action;
 		# data collection part
 		done = self._move_player();
