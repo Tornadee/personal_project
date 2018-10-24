@@ -11,7 +11,7 @@ import tensorflowjs as tfjs
 
 class AI:
 	def __init__(self):
-		self.num_states = 2; # px, pz#, ax, az, bx, bz
+		self.num_states = 6; # px, pz, ax, az, bx, bz
 		self.num_actions = 3; # -1 or 0 or 1
 		self.batch_size = 32;
 		self.data = [];
@@ -106,7 +106,7 @@ class game:
 		self._build_platform();
 
 	def _recap(self):
-		print(f"\033[92mEpisode: {AI.episode}, cumulative reward: {AI.total_reward}, steps: {self.step}\033[0m")
+		print(f"\033[92mEpisode: {AI.episode}, cumulative reward: {AI.total_reward}, step: {self.step}\033[0m")
 		AI.episode += 1;
 		AI.rewards.append(AI.total_reward);
 		if AI.episode % 10 == 0:
@@ -114,7 +114,7 @@ class game:
 			for i in range(AI.episode - 10, AI.episode - 1):
 				summation += AI.rewards[i];
 			recap = summation / 10;
-			print(f"\033[94mPrevious 10 episodes: Average total reward: {recap}, Epsilon: {round(AI.epsilon, 2)}\033[0m")
+			print(f"\033[94mPrevious 10 episodes: Average total reward: {recap}\033[0m")
 
 	def _reset(self): # reset environment
 		# randomize map or keep the same map?
@@ -138,8 +138,7 @@ class game:
 
 	def _build_platform(self):
 		# build platforms ahead
-		while num_platforms < 300:
-			num_platforms += 1;
+		while (self.player.z + 50 >= self.previous_platform_z):
 			shift_x = random.randint(-1, 1) * self.deviation;
 			shift_z = 5;
 			x = self.previous_platform_x + shift_x;
@@ -174,6 +173,7 @@ class game:
 		return a;
 
 	def _return_state(self):
+		print(len(self.platforms));
 		for i in range(len(self.platforms)):
 			platform = self.platforms[i];
 			if (platform.z > self.player.z + 1):
@@ -186,7 +186,7 @@ class game:
 				# second next platform, called "b"
 				b_x = self.platforms[i+1].x;
 				b_z = self.platforms[i+1].z;
-				return p_x, p_z#, a_x, a_z, b_x, b_z;
+				return p_x, p_z, a_x, a_z, b_x, b_z;
 		print("WARNING RETURNING STATE WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING")
 		return None
 
@@ -202,11 +202,11 @@ if __name__ == "__main__":
 		done = game._move_player();
 		next_state = game._return_state();
 		# Q-learning
-		reward = 1 if not done else -200
+		reward = 1 if not done else -10
 		AI.total_reward += reward;
 		AI._remember([state, action, next_state, reward, done])
+		print(f"x={game.player.x}, z={game.player.z}, r={game.player.r}, action={action}");
 		game.step += 1;
-		print(f"Step {game.step}, x={round(game.player.x, 2)}, z={round(game.player.z, 2)}, r={round(game.player.r, 2)}, action={action}");
 		if (len(AI.data) >= AI.batch_size):
 			AI._replay();
 		# pass on the state
