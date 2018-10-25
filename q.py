@@ -24,14 +24,12 @@ class AI:
 		self.memory = 50000;
 		self.episode = 0;
 		self.max_episodes = 45;
-		self.alpha = 0.01;		# learning rate
+		self.alpha = 0.001;		# learning rate
 		self.gamma = 0.99;		# discount factor
 		self.epsilon = 1.00;
 		self.ep_decay = 0.995;
 		self.min_ep = 0.1;
 		self.model = self._create_model();
-
-		# (just for checking). Doesn't matter.
 		self.total_reward = 0;
 	
 	def _create_model(self):
@@ -53,33 +51,21 @@ class AI:
 			return action
 
 	def _replay(self):				# Q-learning
-		sample = self._sample(self.data, self.batch_size);
+		sample = random.sample(self.data, self.batch_size)
 		for state, action, next_state, reward, done in sample:
 			target = reward
-			if not done:
-				# Q s-a
-				next_state_prediction = self.model.predict(np.array([next_state]))[0];
-				target = reward + self.gamma * np.amax(next_state_prediction)
+			if done == False:
+				nextPred = self.model.predict(np.array([next_state]))[0];
+				target = reward + self.gamma * np.amax(nextPred)
+				#print(target);
 
 			new_q = self.model.predict(np.array([state]))[0];
-			print(new_q);
-			new_q[action] = target
+			new_q[action + 1] = target # I FOUND THE ERROR!!!
+			print(action);
+			#print(new_q);
 			xss = np.array([state]) # input. This is the game state (observation).
 			yss = np.array([new_q]) # Q-table output. Use Argmax to find the best action.
 			self.model.fit(xss, yss, epochs=1, verbose=0)
-
-	def _sample(self, data, count):	# sample several data from array
-		if (count > len(data)):
-			return False;
-		else:
-			sample = [];
-			sampled_ids = [];
-			while len(sample) < count:
-				rand_id = random.randint(0, count-1);
-				if rand_id not in sampled_ids:
-					sample.append(data[rand_id]);
-					sampled_ids.append(rand_id);
-			return sample;
 
 	def _remember(self, data):		# store data
 		self.data.append(data);
@@ -105,9 +91,11 @@ class game:
 		self.player = player();
 		self.player_move_speed = 0.4;
 		self.player_steer_speed = 0.05;
+		self.platform_width = 2.5;
+		self.platform_length = 1;
 		self.step = 0;
 		self._build_platforms();
-		#self._show_platforms();
+		self._show_platforms();
 
 	def _recap(self):			# summary of training results. Doesn't matter.
 		print(f"\033[92mEpisode: {AI.episode}, cumulative reward: {round(AI.total_reward,2)}, steps: {self.step}, pz: {round(self.player.z,2)}\033[0m")
@@ -120,7 +108,6 @@ class game:
 		self.player.x, self.player.z, self.player.r = 0.0, 0.0, 0.0;
 		self.step = 0;
 		AI.total_reward = 0;
-		AI.frequencies = [0,0,0];
 
 	def _move_player(self):		# apply action and return dead or alive
 		self.player.x += math.sin(self.player.r) * self.player_move_speed;
@@ -131,19 +118,19 @@ class game:
 			return False;
 
 	def _build_platforms(self):	# building the map.
-		num_platforms = 0; # make 45 platforms.
+		num_platforms = 0; # make 35 platforms.
 		prev_z = -2;
 		prev_x = 0;
-		while num_platforms < 8:
+		while num_platforms < 35:
 			num_platforms += 1;
-			shift_x = (random.randint(0, 1)-0.5) * 1.3;
-			shift_z = 4.5;
+			shift_x = (random.randint(0, 1)-0.5) * 1.1;
+			shift_z = self.platform_length;
 			x = round(prev_x + shift_x, 1);
 			z = round(prev_z + shift_z, 1);
 			self.platforms.append(platform(x,z));
 			# next platform will be placed based on this relative position
 			prev_x = x;
-			prev_z = z - 0.5;
+			prev_z = z;
 
 	def _show_platforms(self):	# visualizing the map.
 		print("showing platforms...")
@@ -152,10 +139,10 @@ class game:
 			platform = self.platforms[i];
 			x,y = platform.x, platform.z;
 			verts = [
-			   (x-1.25, y-2.5),  # left, bottom
-			   (x-1.25, y+2.5),  # left, top
-			   (x+1.25, y+2.5),  # right, top
-			   (x+1.25, y-2.5),  # right, bottom
+			   (x-self.platform_width/2, y-self.platform_length/2),  # left, bottom
+			   (x-self.platform_width/2, y+self.platform_length/2),  # left, top
+			   (x+self.platform_width/2, y+self.platform_length/2),  # right, top
+			   (x+self.platform_width/2, y-self.platform_length/2),  # right, bottom
 			   (0., 0.),  # ignored
 			]
 			codes = [Path.MOVETO, Path.LINETO, Path.LINETO, Path.LINETO, Path.CLOSEPOLY]
@@ -179,7 +166,7 @@ class game:
 			# position of player
 			px = self.player.x;
 			pz = self.player.z;
-			if ((px > plat_left) and (px < plat_right) and (pz < plat_far) and (pz > plat_close)):
+			if ((px >= plat_left) and (px <= plat_right) and (pz <= plat_far) and (pz >= plat_close)):
 				a = True;
 				break;
 		return a;
@@ -188,10 +175,13 @@ class game:
 		for i in range(len(self.platforms)):
 			platform = self.platforms[i];
 			if (platform.z > self.player.z + 1):
-				# player position
+				# player position and rotation as inputs
 				p_x = self.player.x;
 				p_z = self.player.z;
 				p_r = self.player.r;
+				# data normalization
+				p_z /= 36;
+				p_x /= 36;
 				return p_x, p_z, p_r;
 
 if __name__ == "__main__":
@@ -209,11 +199,11 @@ if __name__ == "__main__":
 		# observe
 		next_state = game._return_state();
 		# reward structure
-		reward = 1 if not done else -200
-		if game.player.z >= 20:
-			reward += 100
+		reward = 1 if not done else -10
+		'''if game.player.z >= 20:
+			reward += 10
 		elif game.player.z >= 10:
-			reward += 50
+			reward += 5'''
 		# save data
 		AI._remember([state, action, next_state, reward, done])
 		game.step += 1;
