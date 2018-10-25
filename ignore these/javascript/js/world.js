@@ -2,7 +2,7 @@
 const cameraRadius = 6.0;
 const frameRate = 50;
 const ballSpeed = 0.4;
-const steerSpeed = 0.5;
+const steerSpeed = 0.05;
 // game objects
 var camera;
 var light;
@@ -29,7 +29,8 @@ var gameManager = {
 		await this.startEngine();
 		await initItemsJS();
 		await buildStart();
-		await this.startPhysics();
+		await AI.init();
+		//await this.startPhysics();
 		interval = setInterval(update, frameRate); // start updating game elements
 	},
 	startEngine: function() {
@@ -59,12 +60,12 @@ var gameManager = {
 document.getElementById('body').onload = gameManager.pageload();
 
 var frame = 0;
-function update() {
+async function update() {
 	frame += 1;
 	// steer
 	if (keyRightDown) {rotation += steerSpeed};
 	if (keyLeftDown) {rotation -= steerSpeed};
-	rotation += AI.choose_action() * steerSpeed;
+	rotation += await AI.choose_action() * steerSpeed;
 	// apply player movement
 	vx = ballSpeed * Math.sin(rotation - 3.14);
 	vz = ballSpeed * Math.cos(rotation - 3.14);
@@ -89,5 +90,6 @@ function update() {
 	if ((player.position.y < -1.0) || (player.position.y > 100.0)) {
 		engine.stopRenderLoop();
 		clearInterval(interval);
+		console.log("game over");
 	}
 }
