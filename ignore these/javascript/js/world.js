@@ -30,7 +30,7 @@ var gameManager = {
 		await initItemsJS();
 		await buildStart();
 		await AI.init();
-		//await this.startPhysics();
+		await this.startPhysics();
 		interval = setInterval(update, frameRate); // start updating game elements
 	},
 	startEngine: function() {
@@ -65,7 +65,9 @@ async function update() {
 	// steer
 	if (keyRightDown) {rotation += steerSpeed};
 	if (keyLeftDown) {rotation -= steerSpeed};
-	rotation += await AI.choose_action() * steerSpeed;
+	let action = await AI.choose_action();
+	console.log(action);
+	rotation += action * steerSpeed;
 	// apply player movement
 	vx = ballSpeed * Math.sin(rotation - 3.14);
 	vz = ballSpeed * Math.cos(rotation - 3.14);

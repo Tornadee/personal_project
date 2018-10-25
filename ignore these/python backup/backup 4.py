@@ -23,11 +23,11 @@ class AI:
 		self.data = [];
 		self.memory = 90000;
 		self.episode = 0;
-		self.max_episodes = 18;
-		self.alpha = 0.01;		# learning rate
+		self.max_episodes = 90;
+		self.alpha = 0.001;		# learning rate
 		self.gamma = 0.99;		# discount factor
 		self.epsilon = 1.00;
-		self.ep_decay = 0.998;
+		self.ep_decay = 0.999;
 		self.min_ep = 0.1;
 		self.model = self._create_model();
 		self.total_reward = 0;
@@ -61,7 +61,7 @@ class AI:
 			new_q = self.model.predict(np.array([state]))[0];
 			index = action + 1;
 			new_q[index] = target;
-			#print(f"{new_q} ==> {new_q[index]}");
+			print(f"{new_q} ==> {new_q[index]}");
 			xss = np.array([state]) # input
 			yss = np.array([new_q]) # Q-table output. Use Argmax to find the best action.
 			self.model.fit(xss, yss, epochs=1, verbose=0)
@@ -92,9 +92,9 @@ class game:
 		self.player_steer_speed = 0.05;
 		self.platform_width = 2.5;
 		self.platform_length = 1;
-		self.num_platforms = 35;
 		self.step = 0;
 		self._build_platforms();
+		#self._show_platforms();
 
 	def _recap(self):			# summary of training results. Doesn't matter.
 		print(f"\033[92mEpisode: {AI.episode}, cumulative reward: {round(AI.total_reward,2)}, steps: {self.step}, pz: {round(self.player.z,2)}\033[0m")
@@ -117,19 +117,15 @@ class game:
 			return False;
 
 	def _build_platforms(self):	# building the map.
-		map_data = [[0,0],[0.6,1],[1.1,2],[0.6,3],[0.0,4],[0.6,5],[0.0,6],[-0.6,7],[-1.1,8],[-0.6,9],[-0.0,10],[0.6,11],[0.0,12],[0.6,13],[0.0,14],[0.6,15],[1.1,16],[1.7,17],[1.1,18],[0.6,19],[1.1,20],[0.6,21],[1.1,22],[0.6,23],[0.0,24],[-0.6,25],[-1.1,26],[-0.6,27],[-1.1,28],[-0.6,29],[-1.1,30],[-1.7,31],[-1.1,32],[-1.7,33],[-2.2,34]];
-
-		prev_z = -1;
+		num_platforms = 0; # make 35 platforms.
+		prev_z = -2;
 		prev_x = 0;
-		for i in range(self.num_platforms):
-			'''shift_x = (random.randint(0, 1)-0.5) * 1.1;
-			if i == 0:
-				shift_x=0;
+		while num_platforms < 35:
+			num_platforms += 1;
+			shift_x = (random.randint(0, 1)-0.5) * 1.1;
 			shift_z = self.platform_length;
 			x = round(prev_x + shift_x, 1);
-			z = round(prev_z + shift_z, 1);'''
-			x = map_data[i][0];
-			z = map_data[i][1];
+			z = round(prev_z + shift_z, 1);
 			self.platforms.append(platform(x,z));
 			# next platform will be placed based on this relative position
 			prev_x = x;
@@ -158,6 +154,7 @@ class game:
 		print("done showing platforms.");
 
 	def _is_player_on_platform(self):	# player dead or alive??
+		a = False; # is touching at least one platform
 		for i in range(len(self.platforms)):
 			platform = self.platforms[i];
 			# sides of the platform
@@ -169,33 +166,22 @@ class game:
 			px = self.player.x;
 			pz = self.player.z;
 			if ((px >= plat_left) and (px <= plat_right) and (pz <= plat_far) and (pz >= plat_close)):
-				return True;
+				a = True;
 				break;
-		return False;
+		return a;
 
 	def _return_state(self):	# observation
-		# player position and rotation as inputs
-		p_x = self.player.x;
-		p_z = self.player.z;
-		p_r = self.player.r;
-		# data normalization
-		p_z /= 36;
-		p_x /= 36;
-		return p_x, p_z, p_r;
-		'''
 		for i in range(len(self.platforms)):
-			platform = self.platforms[i]
-			platform2 = self.platforms[i+1]
-			if (platform.z >= self.player.z):
-				dx = platform.x - self.player.x;
-				dx /= 10;
-				dx2 = platform.x - self.player.x;
-				dx2 /= 10;
-				pz = self.player.z;
-				pz /= 100;
-				pr = self.player.r
-				return dx, dx2, pz, pr;
-				break;'''
+			platform = self.platforms[i];
+			if (platform.z > self.player.z + 1):
+				# player position and rotation as inputs
+				p_x = self.player.x;
+				p_z = self.player.z;
+				p_r = self.player.r;
+				# data normalization
+				p_z /= 36;
+				p_x /= 36;
+				return p_x, p_z, p_r;
 		print("ERROR ERROR R!");
 
 if __name__ == "__main__":
@@ -206,10 +192,9 @@ if __name__ == "__main__":
 	while AI.episode < AI.max_episodes:
 		# choose action either by random or by prediction.
 		action = AI._choose_action(state);
-		#print(f"{state} ==> {action}");
 		# apply the action
 		game.player.r += action * game.player_steer_speed;
-		# move, and then check if player is dead or alive
+		# check if player is dead or alive
 		done = game._move_player();
 		# observe
 		next_state = game._return_state();
@@ -235,7 +220,7 @@ if __name__ == "__main__":
 		if done:
 			game._recap();
 			game._reset();
-
+	
 	# export model
 	if False:
 		AI._save_model();
@@ -243,7 +228,4 @@ if __name__ == "__main__":
 		for i in range(len(game.platforms)):
 			platform = game.platforms[i];
 			print(f"x:{platform.x},z:{platform.z},");
-
-	# visualize environment
-	#game._show_platforms();
 
