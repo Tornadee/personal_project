@@ -3,7 +3,7 @@ import random
 import math
 import numpy as np
 
-# visual
+# visualization
 import matplotlib.pyplot as plt
 from matplotlib.path import Path
 import matplotlib.patches as patches
@@ -20,14 +20,13 @@ class game:
 	def __init__(self):
 		self.platforms = [];
 		self.player = player();
-		self.player_move_speed = 0.4;
-		self.player_steer_speed = 0.05;
-		self.platform_width = 2.5;
+		self.player_move_speed = 1.4;
+		self.player_steer_speed = 0.1;
+		self.platform_width = 1.8;
 		self.platform_length = 1;
 		self.num_platforms = 35;
 		self.step = 0;
 		self._build_platforms();
-		#self._show_platforms();
 
 	def _reset(self):			# reset environment and variables
 		self.player.x, self.player.z, self.player.r = 0.0, 0.0, 0.0;
@@ -46,22 +45,10 @@ class game:
 
 	def _build_platforms(self):	# building the map.
 		map_data = [[0,0],[0.6,1],[1.1,2],[0.6,3],[0.0,4],[0.6,5],[0.0,6],[-0.6,7],[-1.1,8],[-0.6,9],[-0.0,10],[0.6,11],[0.0,12],[0.6,13],[0.0,14],[0.6,15],[1.1,16],[1.7,17],[1.1,18],[0.6,19],[1.1,20],[0.6,21],[1.1,22],[0.6,23],[0.0,24],[-0.6,25],[-1.1,26],[-0.6,27],[-1.1,28],[-0.6,29],[-1.1,30],[-1.7,31],[-1.1,32],[-1.7,33],[-2.2,34]];
-
-		prev_z = -1;
-		prev_x = 0;
 		for i in range(self.num_platforms):
-			'''shift_x = (random.randint(0, 1)-0.5) * 1.1;
-			if i == 0:
-				shift_x=0;
-			shift_z = self.platform_length;
-			x = round(prev_x + shift_x, 1);
-			z = round(prev_z + shift_z, 1);'''
 			x = map_data[i][0];
 			z = map_data[i][1];
 			self.platforms.append(platform(x,z));
-			# next platform will be placed based on this relative position
-			prev_x = x;
-			prev_z = z;
 
 	def _is_player_on_platform(self):	# player dead or alive??
 		for i in range(len(self.platforms)):
@@ -85,25 +72,10 @@ class game:
 		p_z = self.player.z;
 		p_r = self.player.r;
 		# data normalization
-		p_z /= 6;
-		p_x /= 6;
-		print(p_x, p_z, p_r);
+		p_z /= 10;
+		p_x += 0.5;
+		print(p_x, p_z, p_r)
 		return p_x, p_z, p_r;
-		'''
-		for i in range(len(self.platforms)):
-			platform = self.platforms[i]
-			platform2 = self.platforms[i+1]
-			if (platform.z >= self.player.z):
-				dx = platform.x - self.player.x;
-				dx /= 10;
-				dx2 = platform.x - self.player.x;
-				dx2 /= 10;
-				pz = self.player.z;
-				pz /= 100;
-				pr = self.player.r
-				return dx, dx2, pz, pr;
-				break;'''
-		print("ERROR ERROR R!");
 
 	def _show_platforms(self):	# visualizing the map.
 		print("showing platforms...")

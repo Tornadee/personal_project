@@ -4,17 +4,19 @@
 import random
 import math
 import numpy as np
+# game environment
 import env
-# AI
+# machine learning
 from keras.optimizers import Adam
 from keras.models import Sequential
 from keras.layers import Dense, Dropout
+from keras.models import load_model
 # visualization
 import matplotlib.pyplot as plt
 from matplotlib.path import Path
 import matplotlib.patches as patches
-# export
-import tensorflowjs as tfjs
+# export model
+#import tensorflowjs as tfjs
 
 class AI:
 	def __init__(self):
@@ -24,19 +26,21 @@ class AI:
 		self.data = [];
 		self.memory = 90000;
 		self.episode = 0;
-		self.max_episodes = 28;
-		self.alpha = 0.005;		# learning rate
-		self.gamma = 0.85;		# discount factor
+		self.max_episodes = 60;
+		self.alpha = 0.01;		# learning rate # try 0.005
+		self.gamma = 0.95;		# discount factor # try 0.85
 		self.epsilon = 1.00;
 		self.ep_decay = 0.998;
 		self.min_ep = 0.1;
 		self.model = self._create_model();
 		self.total_reward = 0;
+		self.total_reward_list = [];
 	
 	def _create_model(self):
 		model = Sequential();
 		model.add(Dense(24, input_dim=self.num_states, activation="relu"))
 		model.add(Dense(50, activation="relu"))
+		#model.add(Dense(10, activation="relu"))
 		model.add(Dense(self.num_actions, activation="linear"))#softmax / linear / sigmoid
 		adam = Adam(lr=self.alpha);
 		model.compile(loss="mean_squared_error", optimizer=adam);
@@ -65,14 +69,14 @@ class AI:
 			#print(f"{new_q} ==> {new_q[index]}");
 			xss = np.array([state]) # input
 			yss = np.array([new_q]) # Q-table output. Use Argmax to find the best action.
-			self.model.fit(xss, yss, epochs=2, verbose=0)
+			self.model.fit(xss, yss, epochs=1, verbose=0)
 
 	def _remember(self, data):		# store data
 		self.data.append(data);
 		if (len(self.data)) > self.memory:
 			self.data.pop(0);
 
-	def _recap(self):			# summary of training results. Doesn't matter.
+	def _recap(self):				# summary of training results. Doesn't matter.
 		print(f"\033[92mEpisode: {self.episode + 1}, cumulative reward: {round(self.total_reward,2)}, steps: {env.step}, pz: {round(env.player.z,2)}\033[0m")
 		self.episode += 1;
 		if self.episode % 10 == 0:
@@ -93,7 +97,7 @@ if __name__ == "__main__":
 		action = AI._choose_action(state);
 		done, next_state = env._step(action);
 		# reward structure
-		reward = 1 if not done else -10
+		reward = 1 if not done else -20
 		# remember data
 		AI._remember([state, action, next_state, reward, done])
 		# replay
@@ -108,18 +112,16 @@ if __name__ == "__main__":
 		if done:
 			AI._recap();
 			env._reset();
+			AI.total_reward_list.append(AI.total_reward);
 			AI.total_reward = 0;
 		# pass on the state
 		state = next_state;
 
-	# export model
-	if False:
-		AI._save_model();
-		print("Below is the randomly generated map that the AI interacted in.");
-		for i in range(len(env.platforms)):
-			platform = env.platforms[i];
-			print(f"x:{platform.x},z:{platform.z},");
+	env._show_platforms();
+	# save model
+	if AI.total_reward_list[-1] > 15:
+		model.save("my_model_1.h5");
+	else:
+		print(f"{AI.total_reward_list[-1]} only!");
 
-	# visualize environment
-	#env._show_platforms();
 
