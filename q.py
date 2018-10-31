@@ -24,9 +24,9 @@ class AI:
 		self.data = [];
 		self.memory = 90000;
 		self.episode = 0;
-		self.max_episodes = 18;
-		self.alpha = 0.01;		# learning rate
-		self.gamma = 0.99;		# discount factor
+		self.max_episodes = 28;
+		self.alpha = 0.005;		# learning rate
+		self.gamma = 0.85;		# discount factor
 		self.epsilon = 1.00;
 		self.ep_decay = 0.998;
 		self.min_ep = 0.1;
@@ -65,7 +65,7 @@ class AI:
 			#print(f"{new_q} ==> {new_q[index]}");
 			xss = np.array([state]) # input
 			yss = np.array([new_q]) # Q-table output. Use Argmax to find the best action.
-			self.model.fit(xss, yss, epochs=1, verbose=0)
+			self.model.fit(xss, yss, epochs=2, verbose=0)
 
 	def _remember(self, data):		# store data
 		self.data.append(data);

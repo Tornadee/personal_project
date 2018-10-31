@@ -63,28 +63,6 @@ class game:
 			prev_x = x;
 			prev_z = z;
 
-	def _show_platforms(self):	# visualizing the map.
-		print("showing platforms...")
-		fig, ax = plt.subplots()
-		for i in range(len(self.platforms)):
-			platform = self.platforms[i];
-			x,y = platform.x, platform.z;
-			verts = [
-			   (x-self.platform_width/2, y-self.platform_length/2),  # left, bottom
-			   (x-self.platform_width/2, y+self.platform_length/2),  # left, top
-			   (x+self.platform_width/2, y+self.platform_length/2),  # right, top
-			   (x+self.platform_width/2, y-self.platform_length/2),  # right, bottom
-			   (0., 0.),  # ignored
-			]
-			codes = [Path.MOVETO, Path.LINETO, Path.LINETO, Path.LINETO, Path.CLOSEPOLY]
-			path = Path(verts, codes)
-			patch = patches.PathPatch(path, facecolor='orange', lw=1)
-			ax.add_patch(patch)
-		ax.set_xlim(-18, 18)
-		ax.set_ylim(0, 36)
-		plt.show();
-		print("done showing platforms.");
-
 	def _is_player_on_platform(self):	# player dead or alive??
 		for i in range(len(self.platforms)):
 			platform = self.platforms[i];
@@ -109,6 +87,7 @@ class game:
 		# data normalization
 		p_z /= 6;
 		p_x /= 6;
+		print(p_x, p_z, p_r);
 		return p_x, p_z, p_r;
 		'''
 		for i in range(len(self.platforms)):
@@ -125,3 +104,25 @@ class game:
 				return dx, dx2, pz, pr;
 				break;'''
 		print("ERROR ERROR R!");
+
+	def _show_platforms(self):	# visualizing the map.
+		print("showing platforms...")
+		fig, ax = plt.subplots()
+		for i in range(len(self.platforms)):
+			platform = self.platforms[i];
+			x,y = platform.x, platform.z;
+			verts = [
+			   (x-self.platform_width/2, y-self.platform_length/2),  # left, bottom
+			   (x-self.platform_width/2, y+self.platform_length/2),  # left, top
+			   (x+self.platform_width/2, y+self.platform_length/2),  # right, top
+			   (x+self.platform_width/2, y-self.platform_length/2),  # right, bottom
+			   (0., 0.),  # ignored
+			]
+			codes = [Path.MOVETO, Path.LINETO, Path.LINETO, Path.LINETO, Path.CLOSEPOLY]
+			path = Path(verts, codes)
+			patch = patches.PathPatch(path, facecolor='orange', lw=1)
+			ax.add_patch(patch)
+		ax.set_xlim(-18, 18)
+		ax.set_ylim(0, 36)
+		plt.show();
+		print("done showing platforms.");
