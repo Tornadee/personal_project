@@ -26,8 +26,8 @@ class AI:
 		self.data = [];
 		self.memory = 90000;
 		self.episode = 0;
-		self.max_episodes = 480;
-		self.alpha = 0.01;		# learning rate   # so far best= 0.005
+		self.max_episodes = 490;
+		self.alpha = 0.005;		# learning rate   # so far best= 0.005
 		self.gamma = 0.85;		# discount factor # so far best= 0.85
 		self.epsilon = 1.00;
 		self.ep_decay = 0.998;
@@ -88,9 +88,9 @@ class AI:
 
 	def _show_graph(self):
 		width = self.total_reward_list;
+		plt.plot([0,len(width)], [0,0])
 		x = list(range(0,len(width)))
 		plt.scatter(x,width, color='k', s=10)
-		plt.plot([0,0], [width,0])
 		plt.title("Game analysis")
 		plt.xlabel("Episode")
 		plt.ylabel("Rewards")
@@ -133,7 +133,7 @@ if __name__ == "__main__":
 	#env._show_platforms();
 	AI._show_graph();
 	# save model
-	save_threshold = -8; # lower number = save more.
+	save_threshold = 0; # lower number = save more.
 	if AI.total_reward_list[-1] > save_threshold:
 		AI.model.save("my_model_1.h5");
 	elif AI.total_reward_list[-2] > save_threshold:
