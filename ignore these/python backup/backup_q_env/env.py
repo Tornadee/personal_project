@@ -44,7 +44,7 @@ class game:
 		return done, next_state;
 
 	def _build_platforms(self):	# building the map.
-		map_data = [0,1,2,2,1,0,0,-1,-2,-3,-3,-2,-1,0,1,2,2,1,0,0,0];
+		map_data = [0,1,2,2,1,0,0,-1,-2,-3,-3,-2,-1,0,1,2,2,1,0];
 		z = 0;
 		for i in range(len(map_data)):
 			x = map_data[i] * 0.6;
@@ -68,28 +68,16 @@ class game:
 		return False;
 
 	def _return_state(self):	# observation
-		# player position and rotations
+		# player position and rotation as inputs
 		p_x = self.player.x;
 		p_z = self.player.z;
 		p_r = self.player.r;
-		# upcoming platform relative positions
-		blockind_1 = round((p_z - 1));
-		b_1 = self.platforms[blockind_1];
-		blockind_2 = round((p_z));
-		b_2 = self.platforms[blockind_2];
-		# differences in X coordinates
-		d_1_x = p_x - b_1.x;
-		d_2_x = p_x - b_2.x;
 		# data normalization
 		p_z /= 10;
 		p_x /= 2;
-		d_1_x /= 2;
-		d_2_x /= 2;
 		p_x += 0.5;
-		d_1_x += 0.5;
-		d_2_x += 0.5;
 		#print(p_x, p_z, p_r)
-		return p_x, p_z, p_r, d_1_x, d_2_x;
+		return p_x, p_z, p_r;
 
 	def _show_platforms(self):	# visualizing the map.
 		print("showing platforms...")

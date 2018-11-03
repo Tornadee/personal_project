@@ -20,13 +20,13 @@ import matplotlib.patches as patches
 
 class AI:
 	def __init__(self):
-		self.num_states = 5;	# player x & z & rotation, nearest 2 blocks position x differences.
+		self.num_states = 3;	# coordinates of player, rotation of player
 		self.num_actions = 3;	# turn left, turn right, or go straight
 		self.batch_size = 32;
 		self.data = [];
 		self.memory = 90000;
 		self.episode = 0;
-		self.max_episodes = 480;
+		self.max_episodes = 300;
 		self.alpha = 0.01;		# learning rate   # so far best= 0.005
 		self.gamma = 0.85;		# discount factor # so far best= 0.85
 		self.epsilon = 1.00;
@@ -87,10 +87,8 @@ class AI:
 		tfjs.converters.save_keras_model(self.model, "tfjsmodel")
 
 	def _show_graph(self):
-		width = self.total_reward_list;
-		x = list(range(0,len(width)))
-		plt.scatter(x,width, color='k', s=10)
-		plt.plot([0,0], [width,0])
+		x = list(range(0,len(self.total_reward_list)))
+		plt.scatter(x,self.total_reward_list, color='k', s=40)
 		plt.title("Game analysis")
 		plt.xlabel("Episode")
 		plt.ylabel("Rewards")
@@ -106,11 +104,6 @@ if __name__ == "__main__":
 		done, next_state = env._step(action);
 		# reward structure
 		reward = 1 if not done else -20
-		if env.player.z >= env.platforms[-2].z:
-			# map complete
-			done = True
-			reward = 20
-
 		# remember data
 		AI._remember([state, action, next_state, reward, done])
 		# replay
@@ -133,6 +126,7 @@ if __name__ == "__main__":
 	#env._show_platforms();
 	AI._show_graph();
 	# save model
+	'''
 	save_threshold = -8; # lower number = save more.
 	if AI.total_reward_list[-1] > save_threshold:
 		AI.model.save("my_model_1.h5");
@@ -141,6 +135,6 @@ if __name__ == "__main__":
 	elif AI.total_reward_list[-3] > save_threshold:
 		AI.model.save("my_model_1.h5");
 	else:
-		print(f"{AI.total_reward_list[-1]} only. Model is not fit enough.");
+		print(f"{AI.total_reward_list[-1]} only. Model is not fit enough.");'''
 
 

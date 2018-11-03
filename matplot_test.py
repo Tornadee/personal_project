@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 
 x = [1,2,3,5,6,7]
 y = [2,3,5,6,6,7];
-plt.scatter(x,y, color='k')
+plt.scatter(x,y, color='k', s=500, marker="*")
 
 
 plt.title("Game analysis")
