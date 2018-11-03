@@ -11,7 +11,7 @@ from keras.optimizers import Adam
 from keras.models import Sequential
 from keras.layers import Dense, Dropout
 from keras.models import load_model
-# visualization
+# data visualization
 import matplotlib.pyplot as plt
 from matplotlib.path import Path
 import matplotlib.patches as patches
@@ -26,12 +26,12 @@ class AI:
 		self.data = [];
 		self.memory = 90000;
 		self.episode = 0;
-		self.max_episodes = 60;
-		self.alpha = 0.01;		# learning rate # try 0.005
-		self.gamma = 0.95;		# discount factor # try 0.85
+		self.max_episodes = 300;
+		self.alpha = 0.01;		# learning rate   # so far best= 0.005
+		self.gamma = 0.75;		# discount factor # so far best= 0.85
 		self.epsilon = 1.00;
-		self.ep_decay = 0.998;
-		self.min_ep = 0.1;
+		self.ep_decay = 0.999;
+		self.min_ep = 0.01;
 		self.model = self._create_model();
 		self.total_reward = 0;
 		self.total_reward_list = [];
@@ -87,6 +87,13 @@ class AI:
 		self.model.save("Keras-64x2-10epoch");
 		tfjs.converters.save_keras_model(self.model, "tfjsmodel")
 
+	def _show_graph(self):
+		x = list(range(0,len(total_reward_list)))
+		plt.scatter(x,self.total_reward_list, color='k')
+		plt.title("Game analysis")
+		plt.xlabel("Episode")
+		plt.ylabel("Rewards")
+		plt.show();
 
 if __name__ == "__main__":
 	AI = AI();		# agent
@@ -97,7 +104,8 @@ if __name__ == "__main__":
 		action = AI._choose_action(state);
 		done, next_state = env._step(action);
 		# reward structure
-		reward = 1 if not done else -20
+		reward = 1 if not done else -15
+		if game.player.z >= game.platforms[-1].z: reward = 20;
 		# remember data
 		AI._remember([state, action, next_state, reward, done])
 		# replay
@@ -118,10 +126,16 @@ if __name__ == "__main__":
 		state = next_state;
 
 	env._show_platforms();
+	AI._show_graph();
 	# save model
-	if AI.total_reward_list[-1] > 15:
-		model.save("my_model_1.h5");
+	save_threshold = -8; # lower number = save more.
+	if AI.total_reward_list[-1] > save_threshold:
+		AI.model.save("my_model_1.h5");
+	elif AI.total_reward_list[-2] > save_threshold:
+		AI.model.save("my_model_1.h5");
+	elif AI.total_reward_list[-3] > save_threshold:
+		AI.model.save("my_model_1.h5");
 	else:
-		print(f"{AI.total_reward_list[-1]} only!");
+		print(f"{AI.total_reward_list[-1]} only. Model is not fit enough.");
 
 

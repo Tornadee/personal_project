@@ -3,7 +3,7 @@ import random
 import math
 import numpy as np
 
-# visualization
+# data visualization
 import matplotlib.pyplot as plt
 from matplotlib.path import Path
 import matplotlib.patches as patches
@@ -20,11 +20,10 @@ class game:
 	def __init__(self):
 		self.platforms = [];
 		self.player = player();
-		self.player_move_speed = 1.4;
-		self.player_steer_speed = 0.1;
-		self.platform_width = 1.8;
+		self.player_move_speed = 1.0;
+		self.player_steer_speed = 0.15;
+		self.platform_width = 1.8; # worked well with 1.75;
 		self.platform_length = 1;
-		self.num_platforms = 35;
 		self.step = 0;
 		self._build_platforms();
 
@@ -44,10 +43,11 @@ class game:
 		return done, next_state;
 
 	def _build_platforms(self):	# building the map.
-		map_data = [[0,0],[0.6,1],[1.1,2],[0.6,3],[0.0,4],[0.6,5],[0.0,6],[-0.6,7],[-1.1,8],[-0.6,9],[-0.0,10],[0.6,11],[0.0,12],[0.6,13],[0.0,14],[0.6,15],[1.1,16],[1.7,17],[1.1,18],[0.6,19],[1.1,20],[0.6,21],[1.1,22],[0.6,23],[0.0,24],[-0.6,25],[-1.1,26],[-0.6,27],[-1.1,28],[-0.6,29],[-1.1,30],[-1.7,31],[-1.1,32],[-1.7,33],[-2.2,34]];
-		for i in range(self.num_platforms):
-			x = map_data[i][0];
-			z = map_data[i][1];
+		map_data = [0,1,2,1,0,0.5,1,0,-1,-2,-2,-2,-1,0,1,0,0,1,2,1,2,3,2,3];
+		z = 0;
+		for i in range(len(map_data)):
+			x = map_data[i] * 0.6;
+			z += 1;
 			self.platforms.append(platform(x,z));
 
 	def _is_player_on_platform(self):	# player dead or alive??
@@ -73,6 +73,7 @@ class game:
 		p_r = self.player.r;
 		# data normalization
 		p_z /= 10;
+		p_x /= 2;
 		p_x += 0.5;
 		print(p_x, p_z, p_r)
 		return p_x, p_z, p_r;
