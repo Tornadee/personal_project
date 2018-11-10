@@ -3,33 +3,51 @@ var AI = {
     this.model = await tf.loadModel("http://localhost:8888/fetch_json");
     console.log("loaded");
   },
-  closest_diff: async function() {
-    for (var i=0;i<platforms_data.length;i++) {
-        var platform = platforms_data[i];
-        if (platform.z * (-1) < player.position.z) {
-            let dx = player.position.x - platform.x;
-            return dx / 10;
-            break;
-        }
-    }
+  returnState: async function() {
+    // player absolute position
+    var p_z = player.position.z * (-1) + 0.3;
+    var p_x = player.position.x * (-1) * 1.3;
+    var p_r = rotation;
+    // relative nearest block observation
+    let p_at_ind = Math.round(player.position.z/(-2.0));
+    block_ind_1 = p_at_ind +0;
+    block_ind_2 = p_at_ind +1;
+    block_ind_3 = p_at_ind +2;
+    b_1_x = platforms_data[block_ind_1];
+    b_2_x = platforms_data[block_ind_2];
+    b_3_x = platforms_data[block_ind_3];
+    d_1_x = p_x - b_1_x;
+    d_2_x = p_x - b_2_x;
+    d_3_x = p_x - b_3_x;
+    // data normalization
+    p_z /= 10;
+    p_x /= 2;
+    d_1_x /= 2;
+    d_2_x /= 2;
+    d_3_x /= 2;
+    p_x += 0.5;
+    d_1_x += 0.5;
+    d_2_x += 0.5;
+    d_3_x += 0.5;
+    var observation = [p_x, p_z, p_r, d_1_x, d_2_x, d_3_x];
+    return observation;
   },
   choose_action: async function() {
     // input
-    let dx = await this.closest_diff();
-    let pz = await player.position.z * (-1);
-    let pr = await rotation;
-    let input = await tf.tensor([[dx, pz, pr]]);
-    // prediction
-    var prediction = await this.model.predict(input);
-    var choice = await prediction.argMax(1).dataSync()[0]; // axis = 1
-    var action = await Number(choice - 1); // 0,1,2 --> -1,0,1
-    // logging / debug
-    console.log("input=");
-    input.print();
-    console.log("prediction = ");
-    prediction.print();
-    console.log("choice = " + choice);
-    console.log("action = " + action);
-    return action;
+    let observation = await this.returnState();
+    console.log(observation);
+    if (!(isNaN(observation[3]))) {
+        let input_tensor = await tf.tensor([observation]); //.expandDims(1);
+        // prediction
+        var prediction = await this.model.predict(input_tensor);
+        var action_index = await prediction.argMax(1).dataSync()[0]; // axis = 1
+        var action_value = action_index - 1; // 0,1,2 --> -1,0,1
+        // logging
+        prediction.print();
+        //console.log(action_index,action_value);
+        return action_value;
+    } else {
+        return 0;
+    }
   }
 }

@@ -76,7 +76,7 @@ class AI:
 
 	def _save_model(self, lastest_tot_rews):	# save h5 model
 		# judge fitness
-		if 124 in lastest_tot_rews:
+		if True: #103 in lastest_tot_rews
 			self.model.save("my_model_1.h5")
 			self.model.save("Keras-64x2-10epoch");
 			tfjs.converters.save_keras_model(self.model, "tfjsmodel");
@@ -103,7 +103,7 @@ if __name__ == "__main__":
 			done = True
 			reward = 20
 			complete = True
-			AI.min_ep = 0.005;
+			AI.min_ep = 0.05;
 
 		# remember data
 		AI._remember([state, action, next_state, reward, done])
