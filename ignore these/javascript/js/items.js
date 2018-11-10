@@ -6,11 +6,11 @@ var deletedIdno = 0;
 var matList = [];
 function initItemsJS() {
   mainMat = new BABYLON.StandardMaterial("mainMat", scene);
-  mainMat.diffuseColor = BABYLON.Color3.Blue();
-  //mainMat.diffuseTexture = new BABYLON.Texture("assets/ice.png", scene); //http://i346.photobucket.com/albums/p430/seojoony/ice_packed_zpsxtozaj2c.png
-  //mainMat.diffuseTexture.uScale = 1.0;//Repeat u times on the Vertical Axes
-  //mainMat.diffuseTexture.vScale = 1.0;//Repeat v times on the Horizontal Axes
-  //mainMat.backFaceCulling = false;//Always show the front and the back of an element
+  //mainMat.diffuseColor = BABYLON.Color3.Blue();
+  mainMat.diffuseTexture = new BABYLON.Texture("http://www.sy9000.xyz/assets/ice.png", scene); //http://i346.photobucket.com/albums/p430/seojoony/ice_packed_zpsxtozaj2c.png
+  mainMat.diffuseTexture.uScale = 1.0;//Repeat u times on the Vertical Axes
+  mainMat.diffuseTexture.vScale = 1.0;//Repeat v times on the Horizontal Axes
+  mainMat.backFaceCulling = false;//Always show the front and the back of an element
   matList.push(mainMat);
 
   function makeColorMat(r,g,b,a) {
