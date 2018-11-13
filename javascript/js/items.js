@@ -11,6 +11,7 @@ function initItemsJS() {
   mainMat.diffuseTexture.uScale = 1.0;//Repeat u times on the Vertical Axes
   mainMat.diffuseTexture.vScale = 1.0;//Repeat v times on the Horizontal Axes
   mainMat.backFaceCulling = false;//Always show the front and the back of an element
+  mainMat.alpha = 0.5
   matList.push(mainMat);
 
   function makeColorMat(r,g,b,a) {
@@ -24,6 +25,8 @@ function initItemsJS() {
   makeColorMat(0,100,255,1);
   makeColorMat(0,0,0,1);
   makeColorMat(100,100,100,1);
+  makeColorMat(100,100,200,1);
+  makeColorMat(100,100,200,0.5);
 
   makePlane = function(posList, rotList, sizList, matIndex) {
     let pX = posList[0]; let pY = posList[1]; let pZ = posList[2];
@@ -44,7 +47,6 @@ function initItemsJS() {
     mesh.physicsImpostor = new BABYLON.PhysicsImpostor(mesh, BABYLON.PhysicsImpostor.BoxImpostor, { mass: 0.0, restitution: 0.2 }, scene);
     idno += 1;
   }
-
 }
 
 function removeLast() {

@@ -35,7 +35,7 @@ var AI = {
   choose_action: async function() {
     // input
     var observation = await this.returnState();
-    //observation[1] = 10;
+    observation[1] = 10;
     //observation[0] = 3;
     if (!(isNaN(observation[3]))) {
         let input_tensor = await tf.tensor([observation]); //.expandDims(1);

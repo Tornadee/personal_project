@@ -1,25 +1,3 @@
-function startSkybox() {
-  function skyblockMake(r, x, z) {
-    var skybox = BABYLON.Mesh.CreateBox("skyBox", 100.0, scene);
-    var skyboxMaterial = new BABYLON.StandardMaterial("space", scene);
-    skyboxMaterial.backFaceCulling = false;
-    skyboxMaterial.disableLighting = true;
-    skybox.material = skyboxMaterial;
-    skybox.infiniteDistance = true;
-    skyboxMaterial.disableLighting = true;
-    skyboxMaterial.reflectionTexture = new BABYLON.CubeTexture("assets/space/space", scene);
-    skyboxMaterial.reflectionTexture.coordinatesMode = BABYLON.Texture.SKYBOX_MODE;
-    //http://i.imgur.com/pXD1MZv.png
-    skybox.rotation.y = r * (Math.PI / 180);
-    skybox.position.x = x * -1;
-    skybox.position.z = z * -1;
-  }
-  skyblockMake(0, 1, 0);
-  skyblockMake(90, 0, -1);
-  skyblockMake(180, -1, 0);
-  skyblockMake(270, 0, 1);
-}
-
 function startFountain() {
   var fountain = BABYLON.Mesh.CreateBox("foutain", 1.0, scene);
   // Create a particle system

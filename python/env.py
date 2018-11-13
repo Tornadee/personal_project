@@ -25,6 +25,7 @@ class game:
 	def _reset(self):			# reset environment and variables
 		self.player.x, self.player.z, self.player.r = 0.0, 0.0, 0.0
 		self.step = 0
+		self._build_platforms()
 
 	def _step(self, action):		# apply action and return observation
 		self.step += 1
@@ -38,12 +39,17 @@ class game:
 		return done, next_state
 
 	def _build_platforms(self):	# building the map.
-		map_data = [0,0,1,2,2,1,0,0,-1,-2,-3,-3,-2,-1,0,1,2,2,1,0,0,0,0]
+		self.platforms = []
+		platforms_data = [0,0,1,2,2,1,0,0,-1,-2,-3,-3,-2,-1,0,1,2,2,1,0,0,0,0,0];
+		multip =1; #random.randint(0,1) *2 -1;
+		#x = 0;
 		z = -self.platform_length/2;
-		for i in range(len(map_data)):
-			x = map_data[i] * 0.6
+		for i in range(len(platforms_data)):
+			#if i>1:
+			#	x += math.floor(random.random() * 3) - 1;
+			x = platforms_data[i];
 			z += self.platform_length;
-			self.platforms.append(platform(x,z))
+			self.platforms.append(platform(x*(0.6)*multip,z))
 
 	def _is_player_on_platform(self):	# player dead or alive??
 		for i in range(len(self.platforms)):
@@ -68,23 +74,23 @@ class game:
 		p_r = self.player.r
 		# upcoming platform relative positions
 		p_at_ind = round(p_z/self.platform_length);
-		blockind_1 = p_at_ind - 1
+		blockind_1 = p_at_ind + 0
 		b_1 = self.platforms[blockind_1]
-		blockind_2 = p_at_ind + 0
+		blockind_2 = p_at_ind + 1
 		b_2 = self.platforms[blockind_2]
-		blockind_3 = p_at_ind + 1
+		blockind_3 = p_at_ind + 2
 		b_3 = self.platforms[blockind_3]
 		# differences in X coordinates
 		d_1_x = p_x - b_1.x
 		d_2_x = p_x - b_2.x
 		d_3_x = p_x - b_3.x
 		# data normalization
-		p_z /= 10
-		p_x /= 2
+		p_z   /= 10
+		p_x   /= 2
 		d_1_x /= 2
 		d_2_x /= 2
 		d_3_x /= 2
-		p_x += 0.5
+		p_x   += 0.5
 		d_1_x += 0.5
 		d_2_x += 0.5
 		d_3_x += 0.5
